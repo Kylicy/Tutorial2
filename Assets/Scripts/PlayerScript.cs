@@ -9,7 +9,16 @@ public class PlayerScript : MonoBehaviour
     private Rigidbody2D rd2d;
     public float speed;
     public Text score;
+    public Text livesText;
+    public AudioClip musicClipOne;
+
+    public AudioClip musicClipTwo;
+
+    public AudioSource musicSource;
     private int scoreValue = 0; // initial score value
+    public GameObject winTextObject;
+    public GameObject loseTextObject;
+    private int lives; // Lives integer
 
     // Start is called before the first frame update
     // rd2d finds and saves Rigidbody2D component
@@ -17,6 +26,18 @@ public class PlayerScript : MonoBehaviour
     {
         rd2d = GetComponent<Rigidbody2D>();
         score.text = scoreValue.ToString(); //automatically updates score to 0 on very first frame
+        winTextObject.SetActive(false);
+        lives = 3;
+        
+        SetLivesText(); // Sets initial lives
+        loseTextObject.SetActive(false);
+
+        musicSource.clip = musicClipOne;
+        musicSource.Play();
+    }
+    void SetLivesText()
+    {
+        livesText.text = "Lives: " + lives.ToString();
     }
 
     // Update is called once per frame
@@ -38,8 +59,29 @@ public class PlayerScript : MonoBehaviour
             score.text = scoreValue.ToString();
             Destroy(collision.collider.gameObject);
         }
+         if(scoreValue >= 4)
+        {
+            winTextObject.SetActive(true);
+            musicSource.clip = musicClipTwo;
+            musicSource.Play();
+            Destroy(this);
+        }
+        else if(collision.collider.tag == "Enemy")
+        {
+            collision.gameObject.SetActive(false);
+            lives = lives - 1;
+
+            SetLivesText();
+        }
+        if (lives == 0)
+        {
+            Destroy(this);
+
+            loseTextObject.SetActive(true);
+        }
     }
 
+    
     private void OnCollisionStay2D(Collision2D collision)
     {
         if(collision.collider.tag == "Ground") // Checks to see if player is colliding with ground
